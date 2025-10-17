@@ -1,8 +1,8 @@
 name: CI/CD to GKE
-
 on:
   push:
-    branches: [ main ]
+    branches: 
+      - 'main'
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT }}
@@ -27,6 +27,10 @@ jobs:
     #     with:
     #       workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }} # e.g., "projects/123/locations/global/workloadIdentityPools/my-pool/providers/github"
         #    service_account: ${{ secrets.GCP_SA_EMAIL }}                         # e.g., my-sa@project.iam.gserviceaccount.com
+
+      - uses: 'google-github-actions/auth@v3'
+        with:
+        credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}' # Replace with the name of your GitHub Actions secret
 
       - name: Configure gcloud
         uses: google-github-actions/setup-gcloud@v1
