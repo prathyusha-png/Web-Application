@@ -35,44 +35,44 @@ jobs:
           project_id: ${{ env.PROJECT_ID }}
           install_components: "gke-gcloud-auth-plugin"
 
-    #   - name: Configure Docker for Artifact Registry
-    #     run: |
-    #       gcloud auth configure-docker ${REPO_LOCATION}-docker.pkg.dev
+      - name: Configure Docker for Artifact Registry
+        run: |
+          gcloud auth configure-docker ${REPO_LOCATION}-docker.pkg.dev
 
-    #   - name: Build, tag, and push Docker image
-    #     env:
-    #       IMAGE_TAG: ${{ github.sha }}
-    #       REPO_URL: "${{ env.REPO_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}"
-    #     run: |
-    #       IMAGE=${REPO_URL}:${IMAGE_TAG}
-    #       echo "Building image: ${IMAGE}"
-    #       docker build -t ${IMAGE} .
-    #       docker push ${IMAGE}
-    #       echo "IMAGE=${IMAGE}" >> $GITHUB_ENV
+      - name: Build, tag, and push Docker image
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+          REPO_URL: "${{ env.REPO_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}"
+        run: |
+          IMAGE=${REPO_URL}:${IMAGE_TAG}
+          echo "Building image: ${IMAGE}"
+          docker build -t ${IMAGE} .
+          docker push ${IMAGE}
+          echo "IMAGE=${IMAGE}" >> $GITHUB_ENV
 
-    #   - name: Get GKE credentials (for kubectl)
-    #     run: |
-    #       gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER_NAME }} \
-    #         --zone ${{ secrets.GKE_CLUSTER_ZONE }} \
-    #         --project ${{ env.PROJECT_ID }}
+      - name: Get GKE credentials (for kubectl)
+        run: |
+          gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER_NAME }} \
+            --zone ${{ secrets.GKE_CLUSTER_ZONE }} \
+            --project ${{ env.PROJECT_ID }}
 
-    #   - name: Deploy to GKE
-    #     run: |
-    #       kubectl apply -f k8s/namespace.yaml
-    #       kubectl -n hello-app apply -f k8s/deployment.yaml
-    #       kubectl -n hello-app set image deployment/hello-deployment \
-    #         hello=${{ env.REPO_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}:${{ github.sha }} --record
-    #       kubectl -n hello-app apply -f k8s/service.yaml
+      - name: Deploy to GKE
+        run: |
+          kubectl apply -f k8s/namespace.yaml
+          kubectl -n hello-app apply -f k8s/deployment.yaml
+          kubectl -n hello-app set image deployment/hello-deployment \
+            hello=${{ env.REPO_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}:${{ github.sha }} --record
+          kubectl -n hello-app apply -f k8s/service.yaml
 
-    #   - name: Wait for service external IP
-    #     run: |
-    #       echo "Waiting for external IP (up to 5 minutes)..."
-    #       for i in {1..30}; do
-    #         ip=$(kubectl -n hello-app get svc hello-service -o jsonpath='{.status.loadBalancer.ingress[0].ip}' || true)
-    #         if [ -n "$ip" ]; then
-    #           echo "EXTERNAL_IP=$ip" >> $GITHUB_ENV
-    #           echo "Service external IP: $ip"
-    #           break
-    #         fi
-    #         sleep 10
-    #       done
+      - name: Wait for service external IP
+        run: |
+          echo "Waiting for external IP (up to 5 minutes)..."
+          for i in {1..30}; do
+            ip=$(kubectl -n hello-app get svc hello-service -o jsonpath='{.status.loadBalancer.ingress[0].ip}' || true)
+            if [ -n "$ip" ]; then
+              echo "EXTERNAL_IP=$ip" >> $GITHUB_ENV
+              echo "Service external IP: $ip"
+              break
+            fi
+            sleep 10
+          done
