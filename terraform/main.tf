@@ -4,7 +4,7 @@ provider "google" {
   zone    = var.zone
 }
 
-# Create VPC and subnetwork (simple)
+# Create VPC and subnetwork (simple)  
 resource "google_compute_network" "vpc" {
   name                    = "${var.cluster_name}-vpc"
   auto_create_subnetworks = false
